@@ -1,0 +1,39 @@
+meta {
+  name: set-ipv6-host
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://192.168.0.1/api/v1/int_ipv6host_exposure
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  X-CSRF-TOKEN: {{token}}
+}
+
+body:form-urlencoded {
+  pwEnable: true
+  hsPwEnable: true
+  ipv6HostTbl[0][__id]: ?
+  ipv6HostTbl[0][Enable]: true
+  ipv6HostTbl[0][AllInterfaces]: true
+  ipv6HostTbl[0][ExternalPort]: 22
+  ipv6HostTbl[0][ExternalPortEndRange]: 22
+  ipv6HostTbl[0][InternalPort]: 22
+  ipv6HostTbl[0][InternalPortEndRange]: 22
+  ipv6HostTbl[0][Protocol]: TCP
+  ipv6HostTbl[0][InternalClient]: 255.255.255.255
+  ipv6HostTbl[0][Description]: pi-22
+  ipv6HostTbl[0][MacAddress]: b8:27:eb:e4:47:21
+}
+
+script:pre-request {
+  const requestResponse = await bru.runRequest("refresh");
+}
+
+settings {
+  encodeUrl: false
+}

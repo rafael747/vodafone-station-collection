@@ -1,0 +1,15 @@
+meta {
+  name: get-ipv6-hosts
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://192.168.0.1/api/v1/int_ipv6host_exposure
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: false
+}

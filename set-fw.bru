@@ -1,0 +1,28 @@
+meta {
+  name: set-fw
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://192.168.0.1/api/v1/firewall
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  X-CSRF-TOKEN: {{token}}
+}
+
+body:form-urlencoded {
+  FirewallLevel: on
+  FirewallLevelV6: on
+}
+
+script:pre-request {
+  const requestResponse = await bru.runRequest("refresh");
+}
+
+settings {
+  encodeUrl: false
+}

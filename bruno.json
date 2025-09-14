@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "vodafone-station",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

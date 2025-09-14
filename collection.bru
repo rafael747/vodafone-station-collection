@@ -1,0 +1,17 @@
+headers {
+  Cookie: cwd=No; {{PHPSESSID}}
+  Referer: http://{{ROUTER_IP}}/
+  X-Requested-With: XMLHttpRequest
+  user-agent: {{USER_AGENT}}
+}
+
+auth {
+  mode: none
+}
+
+vars:pre-request {
+  ROUTER_IP: {{process.env.ROUTER_IP}}
+  ROUTER_USER: {{process.env.ROUTER_USER}}
+  ROUTER_PASSWORD: {{process.env.ROUTER_PASSWORD}}
+  USER_AGENT: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0
+}

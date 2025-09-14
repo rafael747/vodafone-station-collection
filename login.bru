@@ -1,0 +1,111 @@
+meta {
+  name: login
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://192.168.0.1/api/v1/wifi/1/SSIDEnable
+  body: none
+  auth: inherit
+}
+
+vars:post-response {
+  token: res.body.token
+}
+
+script:pre-request {
+  const crypto = require("crypto-js");
+  
+  const router_ip = bru.getCollectionVar("ROUTER_IP");
+  const router_user = bru.getCollectionVar("ROUTER_USER");
+  const router_password = bru.getCollectionVar("ROUTER_PASSWORD");
+  const user_agent = bru.getCollectionVar("USER_AGENT");
+  
+  
+  function doPbkdf2NotCoded(passwd, saltLocal) {
+      const derivedKey = crypto.PBKDF2(passwd, crypto.enc.Utf8.parse(saltLocal), {
+          keySize: 128 / 32,   // 128 bits
+          iterations: 1000,
+          hasher: crypto.algo.SHA256,
+      });
+      return crypto.enc.Hex.stringify(derivedKey);
+  }
+  
+  function getLoginPassword(password, salt, saltWebUI) {
+      return doPbkdf2NotCoded(
+          doPbkdf2NotCoded(password, salt),
+          saltWebUI
+      );
+  }
+  
+  async function login() {
+      try {
+          // First request to get salts
+          const res1 = await bru.sendRequest({
+              method: "POST",
+              url: `http://${router_ip}/api/v1/session/login`,
+              headers: {
+                  "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Referer": bru.interpolate(`http://${router_ip}/`),
+                  "User-Agent": user_agent,
+              },
+              data: { username: router_user, password: "seeksalthash", logout: true },
+          });
+  
+          console.log("First response:", res1);
+  
+          const tmpPHPSESSID = res1.headers["set-cookie"].split(";")[0]; // "PHPSESSID=abcd1234"
+          console.log("Extracted temporary session cookie:", tmpPHPSESSID);
+  
+          // Extract salts from res1.data (adjust as needed)
+          const { salt, saltwebui } = res1.data;
+          const password = getLoginPassword(router_password, salt, saltwebui)
+  
+          // Second request with derived password
+          const res2 = await bru.sendRequest({
+              method: "POST",
+              url: `http://${router_ip}/api/v1/session/login`,
+              headers: {
+                  "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                  "Referer": `http://${router_ip}/`,
+                  "User-Agent": user_agent,
+                  "Cookie": tmpPHPSESSID,
+              },
+              data: {
+                  username: router_user,
+                  password: password,
+              },
+          });
+  
+          console.log("Second response:", res2.data);
+          const PHPSESSID = res2.headers["set-cookie"].split(";")[0]; // "PHPSESSID=abcd1234"
+          console.log("Extracted session cookie:", PHPSESSID);
+  
+          const res3 = await bru.sendRequest({
+              method: "GET",
+              url: `http://${router_ip}/api/v1/session/menu`,
+              headers: {
+                      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                      "Referer": `http://${router_ip}/`,
+                      "User-Agent": user_agent,
+                      "X-Requested-With": "XMLHttpRequest",
+                      "Cookie": PHPSESSID,
+              },
+          });
+  
+          console.log("Third response:", res3);
+          await bru.setVar("PHPSESSID", PHPSESSID);
+  
+      } catch (err) {
+          console.error("Error:", err);
+      }
+  }
+  
+  await login();
+  
+}
+
+settings {
+  encodeUrl: false
+}
