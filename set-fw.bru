@@ -5,13 +5,13 @@ meta {
 }
 
 post {
-  url: http://192.168.0.1/api/v1/firewall
+  url: http://{{ROUTER_IP}}/api/v1/firewall
   body: formUrlEncoded
   auth: inherit
 }
 
 headers {
-  X-CSRF-TOKEN: {{token}}
+  X-CSRF-TOKEN: {{CSRF_TOKEN}}
 }
 
 body:form-urlencoded {

@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: http://192.168.0.1/api/v1/wifi/1/SSIDEnable
+  url: http://{{ROUTER_IP}}/api/v1/wifi/1/SSIDEnable
   body: none
   auth: inherit
 }
 
 vars:post-response {
-  token: res.body.token
+  CSRF_TOKEN: res.body.token
 }
 
 settings {

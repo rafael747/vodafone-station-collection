@@ -5,13 +5,13 @@ meta {
 }
 
 post {
-  url: http://192.168.0.1/api/v1/int_ipv6host_exposure
+  url: http://{{ROUTER_IP}}/api/v1/int_ipv6host_exposure
   body: formUrlEncoded
   auth: inherit
 }
 
 headers {
-  X-CSRF-TOKEN: {{token}}
+  X-CSRF-TOKEN: {{CSRF_TOKEN}}
 }
 
 body:form-urlencoded {
@@ -27,7 +27,7 @@ body:form-urlencoded {
   ipv6HostTbl[0][Protocol]: TCP
   ipv6HostTbl[0][InternalClient]: 255.255.255.255
   ipv6HostTbl[0][Description]: pi-22
-  ipv6HostTbl[0][MacAddress]: b8:27:eb:e4:47:21
+  ipv6HostTbl[0][MacAddress]: xx:xx:xx:xx:xx:xx
 }
 
 script:pre-request {
